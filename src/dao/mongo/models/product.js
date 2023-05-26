@@ -10,7 +10,11 @@ const schema = new mongoose.Schema({
     thumbnail:String,
     code:String,
     stock:Number,
-    status:Boolean
+    status:Boolean,
+    quantity:{
+        type: Number,
+        default: 1
+    }
 }, {createdAt:'create_at', updatedAt: 'update_at'}
 );
 
