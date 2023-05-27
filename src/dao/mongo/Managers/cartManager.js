@@ -6,24 +6,32 @@ const productManager = new ProductManager();
 
 export default class CartManager {
 
-    getCarts = (params) =>{
-        return cartModel.find(params).lean();
-    }
-    getCartBy = (params) =>{
-        return cartModel.findOne(params).lean();
-    }
     createCart = (cart) => {
         return cartModel.create(cart);
     };
-    deleteCart = (id) => {
-        return cartModel.findByIdAndDelete(id);
+    getCarts = (params) =>{
+        return cartModel.find(params).lean();
+    }
+    getCartById = (cid) =>{
+        return cartModel.findById({_id:cid}).lean();
+    }
+    deleteCart = (cid) => {
+        return cartModel.findByIdAndDelete(cid);
     };
-    addProductToCart = async (idCart, idProduct) => {
-        await cartModel.updateOne(
-            {_id: idCart},
-            {$push:{products:{product: new mongoose.Types.ObjectId(idProduct)}}}
-        );
+
+    addProductToCart= (cid,pid)=>{
+        return cartModel.updateOne(
+            {_id:cid}, 
+            {$push: {products:{product: new mongoose.Types.ObjectId(pid)}}}
+        )
     };
+
+    // addProductToCart = async (idCart, idProduct) => {
+    //     await cartModel.updateOne(
+    //         {_id: idCart},
+    //         {$push:{products:{product: new mongoose.Types.ObjectId(idProduct)}}}
+    //     );
+    // };
 };
 
 //---------------------------FILESYSTEM------------------------//    

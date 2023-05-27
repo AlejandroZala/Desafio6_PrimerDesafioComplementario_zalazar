@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
     res.send({ status: 'success', payload: products });
   }
 });
-
 router.post('/', async (req, res) => {
   try {
     const { title, description, category, price, thumbnail, code, stock, status } = req.body;
@@ -37,7 +36,6 @@ router.post('/', async (req, res) => {
   }
 ;
 });
-
 router.get('/:pid', async (req, res) => {
   const { pid } = req.params;
   const product = await productsService.getProductBy({ _id: pid });
@@ -45,7 +43,6 @@ router.get('/:pid', async (req, res) => {
     return res.status(404).send({ status: 'error', error: 'Product not found' });
   res.send({ status: 'success', payload: product });
 });
-
 router.put('/:pid', async(req,res)=>{
   const {pid} = req.params;
   const updateProduct = req.body;
@@ -54,7 +51,6 @@ router.put('/:pid', async(req,res)=>{
   req.io.emit('products', products);
   res.sendStatus(201);
 })
-
 router.delete('/:pid',async(req,res)=>{
   const {pid} = req.params;
   await productsService.deleteProduct(pid);

@@ -1,13 +1,15 @@
 import { Router } from "express";
 // import ProductManager from "../dao/fileSystem/Managers/productManager.js";
 import ProductManager from "../dao/mongo/Managers/productManager.js";
+import CartManager from "../dao/mongo/Managers/cartManager.js";
 
 const router = Router();
-const manager = new ProductManager();
+const productManager = new ProductManager();
+const cartManager = new CartManager();
 
 router.get('/', async (req,res)=>{
     try {
-        const products = await manager.getProducts();
+        const products = await productManager.getProducts();
         res.render('products',{products, css: 'products'});
 
     } catch (error) {
@@ -20,7 +22,14 @@ router.get('/chat', async (req,res)=>{
 });
 
 router.get('/realTimeProducts', async(req,res)=>{
-    const products = await manager.getProducts();
+    const products = await productManager.getProducts();
     res.render('realTimeProducts', {products, css: 'realTimeProducts'});
-})
+});
+
+router.get('/carts/:cid', async (req,res)=>{
+    const {cid}= req.params;
+    const cart= await cartManager.getCartById(cid)
+    res.render('cart',{cart})
+});
+
 export default router;

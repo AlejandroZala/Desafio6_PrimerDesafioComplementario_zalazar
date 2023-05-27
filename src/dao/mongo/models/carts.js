@@ -9,19 +9,15 @@ const schema = new mongoose.Schema({
             type: mongoose.SchemaTypes.ObjectId,
             ref: "Products"
           },
+          quantity:{
+            type:Number,
+            default:1
+          }
         }
       ],
-      default: [],
+      default: []
     },
-    totalAmount:{
-      type:Number,
-      default: 0
-    },
-    user:{
-      type: String,
-      default: "UserCart"
-    } 
-  },{ timestamps:{createdAt: "created_at", updatedAt: "updated_at"}}
+    },{ timestamps:{createdAt: "created_at", updatedAt: "updated_at"}}
 );
 
 const cartModel = mongoose.model(collection, schema);
