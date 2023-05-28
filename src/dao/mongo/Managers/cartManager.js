@@ -1,8 +1,4 @@
-import mongoose from "mongoose";
 import cartModel from "../models/carts.js";
-import ProductManager from "./productManager.js";
-
-const productManager = new ProductManager();
 
 export default class CartManager {
 
@@ -15,78 +11,94 @@ export default class CartManager {
     getCartById = (cid) =>{
         return cartModel.findOne({_id:cid}).lean();
     }
-    deleteCart = (cid) => {
-        return cartModel.findByIdAndDelete(cid);
+    deleteCart = async (cid) => {
+        try {
+            const deletedCart = await cartModel.findByIdAndDelete(cid);
+            if (!deletedCart) {
+                throw new Error("Carrito no encontrado");
+            }
+            return deletedCart;
+        } catch (error) {
+                throw new Error(error.message);
+        }
     };
 
-    addProducInCart = async (cid, productFromBody) => {
+    addProductToCart = async (cid, pid) => {
         try {
-            const cart = await cartModel.findOne({ _id: cid })
-            const findProduct = cart.products.some(
-                (product) => product._id._id.toString() === productFromBody._id)
-
-            if (findProduct) {
-                await cartModel.updateOne(
-                    { _id: cid, "products._id": productFromBody._id },
-                    { $inc: { "products.$.quantity": productFromBody.quantity } })
-                return await cartModel.findOne({ _id: cid })
-            }
-
-            await cartModel.updateOne(
-                { _id: cid },
-                {
-                    $push: {
-                        products: {
-                            _id: productFromBody._id,
-                            quantity: productFromBody.quantity
-                        }
-                    }
-                })
-            return await cartModel.findOne({ _id: cid })
+          // Obtén el carrito correspondiente al ID (cid)
+          let cart = await cartModel.findById(cid);
+          if (!cart) {
+            throw new Error("Carrito no encontrado");
+          }
+          // Busca el índice del producto en el arreglo de productos
+          const existingProductIndex = cart.products.findIndex(
+            (product) => product.product == pid
+          );
+          if (existingProductIndex !== -1) {
+            // Si el producto ya existe en el carrito, incrementa la cantidad en 1
+            cart.products[existingProductIndex].quantity += 1;
+          } else {
+            // Si el producto no existe en el carrito, agrégalo al arreglo de productos
+            cart.products.push({ product: pid, quantity: 1 });
+          }
+          // Guarda los cambios en la base de datos
+          cart = await cart.save();
+          return cart;
+        } catch (error) {
+          throw new Error(error.message);
         }
+      };
 
-        catch (err) {
-            console.log(err.message);
-            return err
-        }
-    }
-
-    deleteProductInCart = async (cid, products) => {
+    deleteProductToCart = async (cid, pid) => {
         try {
-            return await cartModel.findOneAndUpdate(
-                { _id: cid },
-                { products },
-                { new: true })
-        } catch (err) {
-            return err
+          let cart = await cartModel.findById(cid);
+          if (!cart) {
+            throw new Error("Carrito no encontrado");
+          }
+          console.log(cart.products);
+          const existingProductIndex = cart.products.findIndex(
+            (product) => product.product == pid
+          );
+          if (existingProductIndex !== -1) {
+            // Elimina el producto del arreglo de productos del carrito
+            cart.products.splice(existingProductIndex, 1);
+          } else {
+            // Si el producto no existe en el carrito, avisame
+            throw new Error("producto no encontrado");
+          }
+          cart = await cart.save();
+        } catch (error) {
+          throw new Error(error.message);
         }
-    }
+      };
 
-    updateProducsInCart = async (cid, products) => {
+    updateProductInCart = async (cid, pid, newQuantity) => {
         try {
-            return await cartModel.findOneAndUpdate(
-                { _id: cid },
-                { products },
-                { new: true })
-        } catch (err) {
-            return err
+          const cartToUpdate = await cartModel.findById(cid);
+          if (!cartToUpdate) {
+            throw new Error("Carrito no encontrado");
+          }
+          const existingProductIndex = cartToUpdate.products.findIndex(
+            (product) => product.product == pid
+          );
+          if (existingProductIndex === -1) {
+            throw new Error("Producto no encontrado en el carrito");
+          }
+          console.log(cartToUpdate.products[existingProductIndex]);
+    
+          const product = cartToUpdate.products[existingProductIndex].product;
+    
+          cartToUpdate.products[existingProductIndex] = {
+            product: product,
+            quantity: newQuantity.quantity,
+          };
+    
+          const updatedCart = await cartToUpdate.save();
+          return updatedCart;
+        } catch (error) {
+          console.log(error);
         }
-    }
-            
-
-    // addProductToCart= (cid,pid)=>{
-    //     return cartModel.updateOne(
-    //         {_id:cid}, 
-    //         {$push: {products:{product: new mongoose.Types.ObjectId(pid)}}}
-    //     )
-    // };
-
-    // addProductToCart = async (idCart, idProduct) => {
-    //     await cartModel.updateOne(
-    //         {_id: idCart},
-    //         {$push:{products:{product: new mongoose.Types.ObjectId(idProduct)}}}
-    //     );
-    // };
+    };
 };
 
 //---------------------------FILESYSTEM------------------------//    
