@@ -13,18 +13,73 @@ export default class CartManager {
         return cartModel.find(params).lean();
     }
     getCartById = (cid) =>{
-        return cartModel.findById({_id:cid}).lean();
+        return cartModel.findOne({_id:cid}).lean();
     }
     deleteCart = (cid) => {
         return cartModel.findByIdAndDelete(cid);
     };
 
-    addProductToCart= (cid,pid)=>{
-        return cartModel.updateOne(
-            {_id:cid}, 
-            {$push: {products:{product: new mongoose.Types.ObjectId(pid)}}}
-        )
-    };
+    addProducInCart = async (cid, productFromBody) => {
+        try {
+            const cart = await cartModel.findOne({ _id: cid })
+            const findProduct = cart.products.some(
+                (product) => product._id._id.toString() === productFromBody._id)
+
+            if (findProduct) {
+                await cartModel.updateOne(
+                    { _id: cid, "products._id": productFromBody._id },
+                    { $inc: { "products.$.quantity": productFromBody.quantity } })
+                return await cartModel.findOne({ _id: cid })
+            }
+
+            await cartModel.updateOne(
+                { _id: cid },
+                {
+                    $push: {
+                        products: {
+                            _id: productFromBody._id,
+                            quantity: productFromBody.quantity
+                        }
+                    }
+                })
+            return await cartModel.findOne({ _id: cid })
+        }
+
+        catch (err) {
+            console.log(err.message);
+            return err
+        }
+    }
+
+    deleteProductInCart = async (cid, products) => {
+        try {
+            return await cartModel.findOneAndUpdate(
+                { _id: cid },
+                { products },
+                { new: true })
+        } catch (err) {
+            return err
+        }
+    }
+
+    updateProducsInCart = async (cid, products) => {
+        try {
+            return await cartModel.findOneAndUpdate(
+                { _id: cid },
+                { products },
+                { new: true })
+        } catch (err) {
+            return err
+        }
+    }
+            
+
+    // addProductToCart= (cid,pid)=>{
+    //     return cartModel.updateOne(
+    //         {_id:cid}, 
+    //         {$push: {products:{product: new mongoose.Types.ObjectId(pid)}}}
+    //     )
+    // };
 
     // addProductToCart = async (idCart, idProduct) => {
     //     await cartModel.updateOne(
