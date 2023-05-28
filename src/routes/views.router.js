@@ -27,9 +27,10 @@ router.get('/realTimeProducts', async(req,res)=>{
 });
 
 router.get('/carts/:cid', async (req,res)=>{
-    const {cid}= req.params;
-    const cart= await cartManager.getCartById(cid)
-    res.render('cart',{cart})
+    const cid = req.params.cid;
+    const carts = await cartManager.getCarts();
+    const cartSelected = carts.find((cart) => cart._id == cid);
+    res.render('cart',{cartSelected})
 });
 
 export default router;

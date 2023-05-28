@@ -1,13 +1,12 @@
 <section>
     <h1>Productos agregados al carrito:</h1>
-    {{#each cart.products}}
+    {{#each cartSelected.products}}
     <div>
-        <p>Titulo: {{this.product.title}}</p>
-        <p>Descripción: {{this.product.description}}</p>
-        <p>Categoria: {{this.product.category}}</p>
-        <p>Precio: ${{this.product.price}}</p>
-        {{!-- <p>Cantidad: {{this.product.quantity}}</p>
-        <p>Id: {{this.product._id}}</p> --}}
+        <p>Titulo: {{product.title}}</p>
+        <p>Descripción: {{product.description}}</p>
+        <p>Categoria: {{product.category}}</p>
+        <p>Precio: ${{product.price}}</p>
+        <p>Cantidad: {{quantity}}</p>
     </div>
     {{/each}}
 </section>
